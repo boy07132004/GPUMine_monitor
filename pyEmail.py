@@ -10,12 +10,11 @@ with open("config.json") as f:
     password = emailAccount['applicationPassword']
     recipients = emailAccount['recipients']
 
-
-def send_warining_email(miner = "Miner name", worker = "Worker name"):
+def send_warining_email(miner = "Miner name", worker = "Worker name", url = ""):
     content = MIMEMultipart()  #建立MIMEMultipart物件
     content["subject"] = f"{miner} -> {worker} alert"  #郵件標題
     content["from"] = sender  #寄件者
-    content.attach(MIMEText(f"{worker} hashrate error."))
+    content.attach(MIMEText(f"{worker} hashrate error.\nPlease check : {url}"))
 
     with smtplib.SMTP(host="smtp.gmail.com", port="587") as smtp:  # 設定SMTP伺服器
         try:
@@ -27,4 +26,3 @@ def send_warining_email(miner = "Miner name", worker = "Worker name"):
 
         except Exception as e:
             print("Error message: ", e)
-

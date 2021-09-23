@@ -15,9 +15,8 @@ class Miner:
         self.__workers.append(__worker)
     
     def check(self):
-        walletUrl = f"https://gpumine.org/api/worker?currency=ETH&address={self.__wallet}&rig="
         for worker in self.__workers:
-            worker.check(walletUrl)
+            worker.check(self.__wallet)
             time.sleep(60)
         
 class Worker:
@@ -37,12 +36,14 @@ class Worker:
                 print("Get info error...\n Retry in 60s")
                 time.sleep(60)
 
-    def check(self, url):
-        workerLocalHashrate = self.get_worker_hashrate(f"{url}{self.__name}")
+    def check(self, walletAddress = ""):
+        walletUrl = f"https://gpumine.org/api/worker?currency=ETH&address={walletAddress}&rig="
+        workerLocalHashrate = self.get_worker_hashrate(f"{walletUrl}{self.__name}")
 
         if (self.__hashrate - workerLocalHashrate) > self.__hashrate*0.1:
             print(f"{self.__name}({self.__hashrate}) low hashrate.")
-            pyEmail.alert_email(self.__minerName, self.__name)
+            checkUrl = f"https://gpumine.org/tw/workers/eth/{walletAddress}/{self.__name}"
+            pyEmail.send_warining_email(self.__minerName, self.__name, checkUrl)
         else:
             print(f"{self.__name}({self.__hashrate}) is mining in {workerLocalHashrate}MH.")
 
