@@ -26,26 +26,28 @@ class Worker:
         self.__hashrate = hashrate
 
     def get_worker_hashrate(self, url):
-        while 1:
-            try:
-                minerData = requests.get(url).text
-                minerDataJSON = json.loads(minerData)
-                localHashrate = minerDataJSON['data']['hashChart']['day'][-1]['submitHashrate'] // 10**6
-                return localHashrate
-            except:
-                print("Get info error...\n Retry in 60s")
-                time.sleep(60)
+        minerData = requests.get(url).text
+        minerDataJSON = json.loads(minerData)
+        localHashrate = minerDataJSON['data']['hashChart']['day'][-1]['submitHashrate'] // 10**6
+        return localHashrate
+                
 
     def check(self, walletAddress = ""):
         walletUrl = f"https://gpumine.org/api/worker?currency=ETH&address={walletAddress}&rig="
-        workerLocalHashrate = self.get_worker_hashrate(f"{walletUrl}{self.__name}")
+        while 1:
+            try:
+                workerLocalHashrate = self.get_worker_hashrate(f"{walletUrl}{self.__name}")
 
-        if (self.__hashrate - workerLocalHashrate) > self.__hashrate*0.1:
-            print(f"{self.__name}({self.__hashrate}) low hashrate.")
-            checkUrl = f"https://gpumine.org/tw/workers/eth/{walletAddress}/{self.__name}"
-            pyEmail.send_warining_email(self.__minerName, self.__name, checkUrl)
-        else:
-            print(f"{self.__name}({self.__hashrate}) is mining in {workerLocalHashrate}MH.")
+                if (self.__hashrate - workerLocalHashrate) > self.__hashrate*0.1:
+                    print(f"{self.__name}({self.__hashrate}) low hashrate.")
+                    checkUrl = f"https://gpumine.org/tw/workers/eth/{walletAddress}/{self.__name}"
+                    #pyEmail.send_warining_email(self.__minerName, self.__name, checkUrl)
+                else:
+                    print(f"{self.__name}({self.__hashrate}) is mining in {workerLocalHashrate}MH.")
+                return
+            except:
+                print("Get info error...\n Retry in 60s")
+                time.sleep(60)
 
 def main():
     with open("config.json") as configFile:
