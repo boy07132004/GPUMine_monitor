@@ -2,6 +2,7 @@ import time
 import json
 import requests
 import pyEmail
+from datetime import datetime
 
 
 class Miner:
@@ -41,13 +42,14 @@ class Worker:
                 if (self.__hashrate - workerLocalHashrate) > self.__hashrate*0.1:
                     print(f"{self.__name}({self.__hashrate}) low hashrate.")
                     checkUrl = f"https://gpumine.org/tw/workers/eth/{walletAddress}/{self.__name}"
-                    #pyEmail.send_warining_email(self.__minerName, self.__name, checkUrl)
+                    pyEmail.send_warining_email(self.__minerName, self.__name, checkUrl)
                 else:
-                    print(f"{self.__name}({self.__hashrate}) is mining in {workerLocalHashrate}MH.")
+                    print(f"[{datetime.now()}] {self.__name}({self.__hashrate}) is mining in {workerLocalHashrate}MH.")
                 return
             except:
-                print("Get info error...\n Retry in 60s")
-                time.sleep(60)
+                print(f"{self.__name} get info error...\n Retry in 60s")
+                time.sleep(6)
+                break
 
 def main():
     with open("config.json") as configFile:
